@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Black History Word Connect</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
@@ -13,806 +13,548 @@
     --cream: #F5EDD6;
     --green: #2D6A4F;
     --light-gold: #F0C040;
+    --orange: #E8760A;
     --bg: #111008;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   body {
-    background-color: var(--bg);
+    background: var(--bg);
     background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(212,160,23,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 90%, rgba(139,26,26,0.1) 0%, transparent 50%);
+      radial-gradient(ellipse at 20% 10%, rgba(212,160,23,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(139,26,26,0.09) 0%, transparent 50%);
     min-height: 100vh;
     font-family: 'Lato', sans-serif;
     color: var(--cream);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 10px 40px;
-  }
-
-  header {
-    text-align: center;
-    margin-bottom: 24px;
+    padding: 14px 12px 30px;
+    overflow-x: hidden;
   }
 
   .kente-bar {
-    width: 100%;
-    max-width: 560px;
-    height: 8px;
+    width: 100%; max-width: 500px; height: 6px;
     background: repeating-linear-gradient(90deg,
-      #D4A017 0px, #D4A017 20px,
-      #8B1A1A 20px, #8B1A1A 40px,
-      #2D6A4F 40px, #2D6A4F 60px,
-      #0A0A0A 60px, #0A0A0A 80px
-    );
-    border-radius: 4px;
-    margin: 0 auto 16px;
+      #D4A017 0,#D4A017 16px,#8B1A1A 16px,#8B1A1A 32px,
+      #2D6A4F 32px,#2D6A4F 48px,#111008 48px,#111008 64px);
+    border-radius: 3px; margin-bottom: 10px;
   }
 
   h1 {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(1.6rem, 5vw, 2.6rem);
-    font-weight: 900;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-shadow: 0 2px 12px rgba(212,160,23,0.3);
-    line-height: 1.1;
+    font-size: clamp(1.3rem,4.5vw,2rem); font-weight:900;
+    color: var(--gold); letter-spacing:1px; text-align:center; line-height:1.1;
   }
-
   h1 span {
-    display: block;
-    color: var(--cream);
-    font-size: 0.45em;
-    font-weight: 300;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    margin-top: 4px;
+    display:block; color:rgba(245,237,214,0.45); font-size:0.42em;
+    font-weight:300; letter-spacing:5px; text-transform:uppercase; margin-top:3px;
   }
 
-  .score-row {
-    display: flex;
-    gap: 20px;
-    margin: 8px 0 18px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
+  .score-row { display:flex; gap:12px; margin:8px 0; justify-content:center; }
   .stat {
-    background: rgba(212,160,23,0.08);
-    border: 1px solid rgba(212,160,23,0.25);
-    border-radius: 8px;
-    padding: 8px 18px;
-    text-align: center;
-    min-width: 90px;
+    background:rgba(212,160,23,0.07); border:1px solid rgba(212,160,23,0.2);
+    border-radius:8px; padding:4px 12px; text-align:center; min-width:68px;
+  }
+  .stat-num { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--gold); font-weight:700; }
+  .stat-label { font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; color:rgba(245,237,214,0.35); }
+
+  #theme-label {
+    font-size:0.62rem; letter-spacing:2.5px; text-transform:uppercase;
+    color:rgba(245,237,214,0.35); text-align:center; margin:2px 0 6px;
   }
 
-  .stat-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    color: var(--gold);
-    font-weight: 700;
+  /* Puzzle dots */
+  .puzzle-dots { display:flex; gap:5px; justify-content:center; margin:4px 0; }
+  .pdot {
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(212,160,23,0.18); border:1px solid rgba(212,160,23,0.35);
+    transition:all 0.3s;
+  }
+  .pdot.done { background:var(--gold); }
+  .pdot.active { background:var(--orange); transform:scale(1.4); }
+
+  /* Word slots */
+  #words-grid {
+    width:100%; max-width:500px;
+    display:flex; flex-direction:column; gap:6px;
+    margin:4px 0 6px;
+  }
+  .word-row { display:flex; gap:4px; align-items:center; }
+  .letter-slot {
+    width:30px; height:30px;
+    background:rgba(255,255,255,0.06);
+    border:1.5px solid rgba(245,237,214,0.13);
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:700;
+    color:var(--cream); transition:all 0.25s;
+  }
+  .letter-slot.solved {
+    background:rgba(232,118,10,0.22); border-color:var(--orange); color:var(--orange);
+    animation:slot-fill 0.3s ease;
+  }
+  @keyframes slot-fill {
+    0%{transform:scale(0.6);opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1}
   }
 
-  .stat-label {
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(245,237,214,0.5);
+  /* Current word forming */
+  #current-word-display {
+    font-family:'Playfair Display',serif; font-size:1.5rem;
+    letter-spacing:5px; color:var(--light-gold);
+    min-height:38px; text-align:center; margin:4px 0 0;
   }
 
-  #clue-box {
-    background: rgba(255,255,255,0.04);
-    border-left: 3px solid var(--gold);
-    border-radius: 0 8px 8px 0;
-    padding: 10px 18px;
-    margin-bottom: 16px;
-    max-width: 540px;
-    width: 100%;
-    font-size: 0.85rem;
-    line-height: 1.5;
-    color: var(--cream);
-    min-height: 48px;
-    transition: all 0.3s;
+  /* Message */
+  #message {
+    height:24px; text-align:center; font-size:0.82rem;
+    font-weight:700; letter-spacing:1px; margin:2px 0;
+  }
+  .msg-ok  { color:#6fcf97; }
+  .msg-err { color:#eb5757; }
+  .msg-info{ color:var(--gold); }
+
+  /* ===== WHEEL ===== */
+  #wheel-container {
+    position:relative; width:280px; height:280px;
+    margin:6px auto 8px; flex-shrink:0;
+    touch-action: none;
   }
 
-  #clue-box strong {
-    color: var(--gold);
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 3px;
+  .wheel-ring {
+    position:absolute; top:10px; left:10px; width:260px; height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 60%, transparent 100%);
+    border:1.5px solid rgba(212,160,23,0.18);
+    box-shadow:0 0 40px rgba(212,160,23,0.07), inset 0 0 30px rgba(0,0,0,0.5);
+    pointer-events:none;
   }
 
-  #word-display {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    min-height: 52px;
-    max-width: 540px;
-    width: 100%;
+  #wheel-canvas {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:2;
   }
 
-  .word-blank {
-    width: 38px;
-    height: 44px;
-    border-bottom: 2.5px solid var(--gold);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 4px;
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--light-gold);
-    transition: all 0.2s;
-    position: relative;
+  .letter-node {
+    position:absolute; width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700;
+    cursor:pointer; user-select:none; touch-action:none;
+    z-index:10;
+    background:linear-gradient(145deg,#2a2005,#1a1503);
+    border:2px solid rgba(212,160,23,0.4); color:var(--cream);
+    box-shadow:0 4px 12px rgba(0,0,0,0.5);
+    transition:background 0.12s, border-color 0.12s, box-shadow 0.12s;
+  }
+  .letter-node.active {
+    background:linear-gradient(145deg, var(--orange), #b05000);
+    border-color:var(--light-gold); color:#fff;
+    box-shadow:0 0 18px rgba(232,118,10,0.65), 0 4px 12px rgba(0,0,0,0.4);
   }
 
-  .word-blank.filled {
-    animation: pop-in 0.15s ease;
-  }
-
-  @keyframes pop-in {
-    0% { transform: scale(0.7); opacity: 0.5; }
-    60% { transform: scale(1.15); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .word-blank.wrong {
-    border-color: var(--deep-red);
-    animation: shake 0.35s ease;
-  }
-
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-  }
-
-  .selected-display {
-    min-height: 40px;
-    margin-bottom: 14px;
-    font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-    color: var(--light-gold);
-    letter-spacing: 4px;
-    text-align: center;
-    padding: 6px 12px;
-    background: rgba(212,160,23,0.06);
-    border-radius: 8px;
-    max-width: 540px;
-    width: 100%;
-  }
-
-  .letter-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    max-width: 320px;
-    width: 100%;
-    margin-bottom: 18px;
-  }
-
-  .letter-btn {
-    aspect-ratio: 1;
-    background: linear-gradient(145deg, #1e1a0e, #2a2410);
-    border: 1.5px solid rgba(212,160,23,0.35);
-    border-radius: 10px;
-    color: var(--cream);
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .letter-btn:hover:not(:disabled) {
-    border-color: var(--gold);
-    color: var(--gold);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(212,160,23,0.2);
-  }
-
-  .letter-btn.selected {
-    background: linear-gradient(145deg, #3d2e05, #5a4510);
-    border-color: var(--gold);
-    color: var(--gold);
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(212,160,23,0.3);
-  }
-
-  .letter-btn:disabled {
-    opacity: 0.25;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
+  /* Controls */
+  .controls { display:flex; gap:10px; justify-content:center; margin-top:4px; }
   .btn {
-    padding: 10px 22px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-family: 'Lato', sans-serif;
-    font-weight: 700;
-    font-size: 0.8rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    transition: all 0.2s;
+    padding:9px 20px; border-radius:8px; border:none; cursor:pointer;
+    font-family:'Lato',sans-serif; font-weight:700; font-size:0.75rem;
+    letter-spacing:1.5px; text-transform:uppercase; transition:all 0.2s;
   }
+  .btn-submit { background:linear-gradient(135deg,var(--orange),#a04800); color:#fff; box-shadow:0 3px 12px rgba(232,118,10,0.3); }
+  .btn-submit:hover { transform:translateY(-2px); }
+  .btn-clear { background:transparent; color:var(--cream); border:1.5px solid rgba(245,237,214,0.2); }
+  .btn-clear:hover { border-color:var(--cream); }
+  .btn-next { background:linear-gradient(135deg,var(--gold),#8a6000); color:#0A0A0A; font-weight:900; }
+  .btn-next:hover { transform:translateY(-2px); }
 
-  .btn-submit {
-    background: linear-gradient(135deg, #D4A017, #a07010);
-    color: #0A0A0A;
-    box-shadow: 0 4px 14px rgba(212,160,23,0.3);
-  }
-
-  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,160,23,0.45); }
-
-  .btn-clear {
-    background: transparent;
-    color: var(--cream);
-    border: 1.5px solid rgba(245,237,214,0.25);
-  }
-
-  .btn-clear:hover { border-color: var(--cream); background: rgba(255,255,255,0.05); }
-
-  .btn-skip {
-    background: transparent;
-    color: rgba(245,237,214,0.4);
-    border: 1.5px solid rgba(245,237,214,0.1);
-    font-size: 0.7rem;
-  }
-
-  .btn-skip:hover { color: var(--cream); border-color: rgba(245,237,214,0.3); }
-
-  #message-box {
-    min-height: 36px;
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 16px;
-    transition: all 0.3s;
-  }
-
-  .msg-success { color: #6fcf97; }
-  .msg-error { color: #eb5757; }
-  .msg-info { color: var(--gold); }
-
-  #progress-section {
-    max-width: 540px;
-    width: 100%;
-  }
-
-  .progress-title {
-    font-size: 0.65rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(245,237,214,0.35);
-    margin-bottom: 10px;
-    text-align: center;
-  }
-
-  .words-found-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .found-word {
-    background: rgba(45,106,79,0.2);
-    border: 1px solid rgba(45,106,79,0.5);
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 0.75rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: #6fcf97;
-    font-weight: 700;
-    animation: slide-in 0.3s ease;
-  }
-
-  @keyframes slide-in {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-
-  .remaining-pill {
-    background: rgba(139,26,26,0.15);
-    border: 1px solid rgba(139,26,26,0.4);
-    color: rgba(245,237,214,0.3);
-  }
-
+  /* Celebration */
   #celebration {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    padding: 30px;
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88);
+    z-index:200; align-items:center; justify-content:center;
+    flex-direction:column; text-align:center; padding:30px;
   }
-
-  #celebration.show { display: flex; }
-
-  #celebration h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 6vw, 3.5rem);
-    color: var(--gold);
-    margin-bottom: 12px;
-  }
-
-  #celebration p {
-    color: var(--cream);
-    font-size: 1rem;
-    margin-bottom: 24px;
-    max-width: 400px;
-    line-height: 1.6;
-  }
-
-  #celebration .final-score {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    color: var(--light-gold);
-    margin-bottom: 28px;
-  }
-
-  .puzzle-indicator {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-
-  .puzzle-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: rgba(212,160,23,0.2);
-    border: 1px solid rgba(212,160,23,0.4);
-    transition: all 0.3s;
-  }
-
-  .puzzle-dot.done { background: var(--gold); }
-  .puzzle-dot.active { background: var(--light-gold); transform: scale(1.3); }
+  #celebration.show { display:flex; }
+  #celebration h2 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,5vw,3rem); color:var(--gold); margin-bottom:10px; }
+  #celebration p { color:var(--cream); font-size:0.95rem; max-width:380px; line-height:1.7; margin-bottom:20px; }
+  #celebration .final-score { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--light-gold); margin-bottom:24px; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="kente-bar"></div>
-  <h1>Word Connect<span>Black History Edition</span></h1>
-</header>
+<div class="kente-bar"></div>
+<h1>Word Connect<span>Black History Edition</span></h1>
 
 <div class="score-row">
-  <div class="stat"><div class="stat-num" id="score-display">0</div><div class="stat-label">Score</div></div>
-  <div class="stat"><div class="stat-num" id="puzzle-display">1</div><div class="stat-label">Puzzle</div></div>
-  <div class="stat"><div class="stat-num" id="streak-display">0</div><div class="stat-label">Streak</div></div>
+  <div class="stat"><div class="stat-num" id="score-el">0</div><div class="stat-label">Score</div></div>
+  <div class="stat"><div class="stat-num" id="puzzle-el">1</div><div class="stat-label">Puzzle</div></div>
+  <div class="stat"><div class="stat-num" id="found-el">0</div><div class="stat-label">Found</div></div>
 </div>
 
-<div class="puzzle-indicator" id="puzzle-dots"></div>
+<div class="puzzle-dots" id="puzzle-dots"></div>
+<div id="theme-label"></div>
+<div id="words-grid"></div>
+<div id="current-word-display">—</div>
+<div id="message"></div>
 
-<div id="clue-box"><strong>Clue</strong><span id="clue-text">Loading...</span></div>
-
-<div id="word-display"></div>
-<div class="selected-display" id="selected-display">—</div>
-
-<div class="letter-grid" id="letter-grid"></div>
+<div id="wheel-container">
+  <div class="wheel-ring"></div>
+  <canvas id="wheel-canvas" width="280" height="280"></canvas>
+</div>
 
 <div class="controls">
-  <button class="btn btn-submit" onclick="submitWord()">Submit</button>
-  <button class="btn btn-clear" onclick="clearSelection()">Clear</button>
-  <button class="btn btn-skip" onclick="skipPuzzle()">Skip →</button>
-</div>
-
-<div id="message-box"></div>
-
-<div id="progress-section">
-  <div class="progress-title">Found This Round</div>
-  <div class="words-found-grid" id="words-found"></div>
+  <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Submit</button>
+  <button class="btn btn-clear" onclick="clearSel()">Clear</button>
+  <button class="btn btn-next" id="next-btn" style="display:none" onclick="nextPuzzle()">Next →</button>
 </div>
 
 <div id="celebration">
-  <div style="font-size:3rem;margin-bottom:12px;">✊🏿</div>
-  <h2>Well Done!</h2>
+  <div style="font-size:3rem;margin-bottom:10px">✊🏿</div>
+  <h2>Outstanding!</h2>
   <p id="celeb-msg"></p>
-  <div class="final-score" id="final-score-display"></div>
+  <div class="final-score" id="final-score-el"></div>
   <button class="btn btn-submit" onclick="restartGame()">Play Again</button>
 </div>
 
 <script>
+// ==================== PUZZLES ====================
 const PUZZLES = [
   {
-    words: ["HARRIET", "TUBMAN", "RAILROAD", "FREEDOM"],
-    clues: {
-      HARRIET: "First name of the 'Moses of her people' who led hundreds to freedom",
-      TUBMAN: "She carried a pistol and vowed 'I never ran my train off the track'",
-      RAILROAD: "Secret network of safe houses used to escape slavery (2 words: ___ ___)",
-      FREEDOM: "What she risked everything to secure for herself and others"
-    },
-    theme: "Harriet Tubman & the Underground Railroad"
+    theme: "Harriet Tubman",
+    letters: ["H","A","R","I","E","T","U","B"],
+    words: ["HARRIET","TRIBE","HEART","BIRTH","BEAR","HIRE","HAIR","BARE"]
   },
   {
-    words: ["ROSA", "PARKS", "BOYCOTT", "MONTGOMERY"],
-    clues: {
-      ROSA: "Her feet were 'tired, but her soul was rested' — first name",
-      PARKS: "She refused to give up her seat — last name",
-      BOYCOTT: "381-day protest against segregated buses in Alabama",
-      MONTGOMERY: "Alabama city where a historic bus protest changed America"
-    },
-    theme: "Rosa Parks & the Montgomery Bus Boycott"
+    theme: "Rosa Parks",
+    letters: ["R","O","S","A","P","K","C","I"],
+    words: ["ROSA","PARK","SOAR","CORK","ROCK","PAIR","SICK","ORCA"]
   },
   {
-    words: ["MARTIN", "DREAM", "MARCH", "JUSTICE"],
-    clues: {
-      MARTIN: "First name of the King of the Civil Rights Movement",
-      DREAM: "The famous vision he shared on the steps of the Lincoln Memorial",
-      MARCH: "250,000 people did this on Washington in August 1963",
-      JUSTICE: "MLK said this must be indivisible — justice anywhere is a threat to ___ everywhere"
-    },
-    theme: "Martin Luther King Jr."
+    theme: "Martin Luther King Jr.",
+    letters: ["M","A","R","T","I","N","K","G"],
+    words: ["MARTIN","KING","TRAIN","GRANT","TRIM","GRAM","MINT","RANK"]
   },
   {
-    words: ["OBAMA", "SENATE", "HOPE", "CHANGE"],
-    clues: {
-      OBAMA: "44th President — first African American to hold the office",
-      SENATE: "He represented Illinois in the U.S. ___ before the presidency",
-      HOPE: "Key word in his 2004 DNC speech: 'The Audacity of ___'",
-      CHANGE: "His 2008 campaign slogan: '___  We Can Believe In'"
-    },
-    theme: "Barack Obama"
+    theme: "Frederick Douglass",
+    letters: ["F","R","E","D","L","A","S","G"],
+    words: ["FRED","GLAD","READ","FLAG","FLED","GALE","DEAR","LARD"]
   },
   {
-    words: ["LANGSTON", "HARLEM", "BLUES", "POET"],
-    clues: {
-      LANGSTON: "First name of Hughes, voice of the Harlem Renaissance",
-      HARLEM: "Manhattan neighborhood that became the Black cultural capital of the 1920s",
-      BLUES: "Musical and emotional tradition woven throughout Hughes' poetry",
-      POET: "Langston Hughes' most celebrated artistic role"
-    },
-    theme: "Langston Hughes & the Harlem Renaissance"
+    theme: "Maya Angelou",
+    letters: ["M","A","Y","E","L","O","N","G"],
+    words: ["ANGEL","MOAN","LONG","MEAN","LANE","YELL","AMONG","MELON"]
   },
   {
-    words: ["MAYA", "ANGELOU", "CAGED", "VOICE"],
-    clues: {
-      MAYA: "Her first name — a legendary poet, memoirist, and activist",
-      ANGELOU: "Her last name — she recited 'On the Pulse of Morning' at Clinton's inauguration",
-      CAGED: "She wrote 'I Know Why the ___ Bird Sings'",
-      VOICE: "Despite being mute for years as a child, she became famous for hers"
-    },
-    theme: "Maya Angelou"
+    theme: "Barack Obama",
+    letters: ["B","A","R","C","K","O","M","E"],
+    words: ["BRACE","COBRA","BROKE","CREAM","MAKER","ROBE","MARK","COKE"]
   },
   {
-    words: ["THURGOOD", "MARSHALL", "SUPREME", "EQUALITY"],
-    clues: {
-      THURGOOD: "First name of the first Black U.S. Supreme Court Justice",
-      MARSHALL: "He argued Brown v. Board of Education — last name",
-      SUPREME: "___ Court — the highest court he would later sit on",
-      EQUALITY: "The legal principle he spent his career fighting for"
-    },
-    theme: "Thurgood Marshall"
+    theme: "Thurgood Marshall",
+    letters: ["T","H","U","R","G","O","D","M"],
+    words: ["THUG","DRUM","TOUR","HOUR","GOTH","MOTH","DRUG","DORM"]
   },
   {
-    words: ["MUHAMMED", "ALI", "FLOAT", "CHAMPION"],
-    clues: {
-      MUHAMMED: "He changed his name to this after joining the Nation of Islam",
-      ALI: "He said 'I am the greatest' — last name",
-      FLOAT: "'___ like a butterfly, sting like a bee'",
-      CHAMPION: "Three-time heavyweight boxing ___ of the world"
-    },
-    theme: "Muhammad Ali"
+    theme: "Muhammad Ali",
+    letters: ["M","U","H","A","L","I","B","E"],
+    words: ["MAIL","BAIL","LAMB","HAIL","MALE","HEAL","BEAM","MILE"]
   }
 ];
 
-// --- Game State ---
-let state = {
-  puzzleIndex: 0,
-  score: 0,
-  streak: 0,
-  wordsFound: [],
-  selectedLetters: [],
-  selectedIndices: [],
-  shuffledLetters: [],
-  currentPuzzle: null,
-  wrongAttempts: 0,
-  currentWordIndex: 0,
-  lives: 5
+// ==================== STATE ====================
+const CX = 140, CY = 140, RADIUS = 98;
+
+let G = {
+  pIdx: 0, score: 0,
+  foundAll: new Set(),
+  foundThis: [],
+  sel: [],          // selected node indices in order
+  dragging: false,
+  puzzle: null
 };
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function nodePos(i, total) {
+  const a = (2 * Math.PI * i / total) - Math.PI / 2;
+  return { x: CX + RADIUS * Math.cos(a), y: CY + RADIUS * Math.sin(a) };
 }
 
+// ==================== BUILD ====================
 function initPuzzle() {
-  const p = PUZZLES[state.puzzleIndex];
-  state.currentPuzzle = p;
-  state.wordsFound = [];
-  state.currentWordIndex = 0;
-  state.wrongAttempts = 0;
-  loadCurrentWord();
-  updatePuzzleDots();
-  updateScoreDisplay();
-  renderFoundWords();
-  document.getElementById('message-box').textContent = '';
-  document.getElementById('message-box').className = '';
+  G.puzzle = PUZZLES[G.pIdx];
+  G.foundThis = [];
+  G.sel = [];
+  G.dragging = false;
+
+  document.getElementById('puzzle-el').textContent = G.pIdx + 1;
+  document.getElementById('found-el').textContent = 0;
+  document.getElementById('theme-label').textContent = G.puzzle.theme;
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('submit-btn').style.display = '';
+  setMsg('', '');
+  renderDots();
+  renderSlots();
+  renderWheel();
+  renderCurrentWord();
 }
 
-function loadCurrentWord() {
-  const p = state.currentPuzzle;
-  if (state.currentWordIndex >= p.words.length) {
-    // All words found in this puzzle
-    completePuzzle();
-    return;
-  }
-  const word = p.words[state.currentWordIndex];
-  const clue = p.clues[word];
-
-  document.getElementById('clue-text').textContent = clue;
-
-  // Build letter pool: word letters + some distractors
-  const distractors = 'BCDFGHJKLMNPQRSTVWXYZ'.split('').filter(c => !word.includes(c));
-  const shuffledDistractors = shuffle(distractors);
-  const needed = Math.max(0, 10 - word.length);
-  const pool = shuffle([...word.split(''), ...shuffledDistractors.slice(0, needed)]);
-  // Make sure max 10 letters shown
-  state.shuffledLetters = pool.slice(0, 10);
-  state.selectedLetters = [];
-  state.selectedIndices = [];
-
-  renderWordBlanks(word);
-  renderLetterGrid();
-  updateSelectedDisplay();
+function renderDots() {
+  const d = document.getElementById('puzzle-dots');
+  d.innerHTML = PUZZLES.map((_,i) =>
+    `<div class="pdot${i<G.pIdx?' done':i===G.pIdx?' active':''}"></div>`
+  ).join('');
 }
 
-function renderWordBlanks(word) {
-  const div = document.getElementById('word-display');
-  div.innerHTML = '';
-  for (let i = 0; i < word.length; i++) {
-    const b = document.createElement('div');
-    b.className = 'word-blank';
-    b.id = `blank-${i}`;
-    div.appendChild(b);
-  }
-}
-
-function renderLetterGrid() {
-  const grid = document.getElementById('letter-grid');
+function renderSlots() {
+  const grid = document.getElementById('words-grid');
   grid.innerHTML = '';
-  state.shuffledLetters.forEach((letter, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'letter-btn';
-    btn.textContent = letter;
-    btn.id = `lbtn-${idx}`;
-    btn.onclick = () => selectLetter(idx, letter);
-    grid.appendChild(btn);
+  G.puzzle.words.slice(0, 6).forEach(w => {
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    row.id = 'row-' + w;
+    w.split('').forEach((_, i) => {
+      const s = document.createElement('div');
+      s.className = 'letter-slot';
+      s.id = `sl-${w}-${i}`;
+      row.appendChild(s);
+    });
+    grid.appendChild(row);
   });
 }
 
-function selectLetter(idx, letter) {
-  if (state.selectedIndices.includes(idx)) {
-    // Deselect
-    state.selectedIndices = state.selectedIndices.filter(i => i !== idx);
-    state.selectedLetters = state.selectedLetters.filter((_, i) => {
-      const pos = state.selectedIndices.indexOf(idx);
-      return true; // re-filter below
-    });
-    // Rebuild properly
-    state.selectedLetters = state.selectedIndices.map(i => state.shuffledLetters[i]);
-    document.getElementById(`lbtn-${idx}`).classList.remove('selected');
-  } else {
-    const word = state.currentPuzzle.words[state.currentWordIndex];
-    if (state.selectedLetters.length >= word.length) return;
-    state.selectedIndices.push(idx);
-    state.selectedLetters.push(letter);
-    document.getElementById(`lbtn-${idx}`).classList.add('selected');
-  }
-  updateSelectedDisplay();
-  updateWordBlanks();
+// ==================== WHEEL ====================
+let nodeEls = [];
+
+function renderWheel() {
+  const container = document.getElementById('wheel-container');
+  // Remove old nodes
+  nodeEls.forEach(n => n.remove());
+  nodeEls = [];
+
+  const letters = G.puzzle.letters;
+  letters.forEach((ch, i) => {
+    const pos = nodePos(i, letters.length);
+    const el = document.createElement('div');
+    el.className = 'letter-node';
+    el.textContent = ch;
+    el.dataset.idx = i;
+    el.style.cssText = `left:${pos.x}px;top:${pos.y}px;transform:translate(-50%,-50%)`;
+    container.appendChild(el);
+    nodeEls.push(el);
+  });
+
+  drawLines();
+
+  // Mouse events on container (event delegation)
+  container.onmousedown = e => {
+    const node = e.target.closest('.letter-node');
+    if (!node) return;
+    e.preventDefault();
+    G.dragging = true;
+    G.sel = [parseInt(node.dataset.idx)];
+    refresh();
+  };
+
+  container.onmouseover = e => {
+    if (!G.dragging) return;
+    const node = e.target.closest('.letter-node');
+    if (!node) return;
+    const idx = parseInt(node.dataset.idx);
+    addToSel(idx);
+  };
+
+  // Touch
+  container.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    const node = nodeAtPoint(t.clientX, t.clientY);
+    if (!node) return;
+    G.dragging = true;
+    G.sel = [parseInt(node.dataset.idx)];
+    refresh();
+  }, {passive:false});
+
+  container.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!G.dragging) return;
+    const t = e.touches[0];
+    const node = nodeAtPoint(t.clientX, t.clientY);
+    if (!node) return;
+    addToSel(parseInt(node.dataset.idx));
+  }, {passive:false});
+
+  container.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (G.dragging && G.sel.length >= 2) handleSubmit();
+    else clearSel();
+  }, {passive:false});
 }
 
-function updateSelectedDisplay() {
-  const d = document.getElementById('selected-display');
-  if (state.selectedLetters.length === 0) {
-    d.textContent = '—';
-  } else {
-    d.textContent = state.selectedLetters.join(' ');
+function nodeAtPoint(cx, cy) {
+  // Find which node contains the touch point
+  for (const el of nodeEls) {
+    const r = el.getBoundingClientRect();
+    if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) return el;
   }
+  return null;
 }
 
-function updateWordBlanks() {
-  const word = state.currentPuzzle.words[state.currentWordIndex];
-  for (let i = 0; i < word.length; i++) {
-    const b = document.getElementById(`blank-${i}`);
-    if (!b) continue;
-    if (state.selectedLetters[i]) {
-      b.textContent = state.selectedLetters[i];
-      b.classList.add('filled');
-    } else {
-      b.textContent = '';
-      b.classList.remove('filled');
-    }
+document.addEventListener('mouseup', () => {
+  if (G.dragging) {
+    if (G.sel.length >= 2) handleSubmit();
+    else clearSel();
   }
-}
+});
 
-function submitWord() {
-  const word = state.currentPuzzle.words[state.currentWordIndex];
-  const attempt = state.selectedLetters.join('');
-
-  if (attempt.length === 0) {
-    showMessage('Select some letters first!', 'msg-info');
+function addToSel(idx) {
+  // Backtrack if hovering second-to-last
+  if (G.sel.length >= 2 && G.sel[G.sel.length - 2] === idx) {
+    G.sel.pop();
+    refresh();
     return;
   }
-
-  if (attempt === word) {
-    // Correct!
-    state.score += Math.max(10, 30 - state.wrongAttempts * 5);
-    state.streak++;
-    state.wordsFound.push(word);
-
-    // Fill in the blanks green
-    for (let i = 0; i < word.length; i++) {
-      const b = document.getElementById(`blank-${i}`);
-      if (b) b.style.borderColor = '#6fcf97';
-    }
-
-    updateScoreDisplay();
-    showMessage(`✓ ${word}! +${Math.max(10, 30 - state.wrongAttempts * 5)} pts`, 'msg-success');
-    renderFoundWords();
-
-    setTimeout(() => {
-      state.currentWordIndex++;
-      state.wrongAttempts = 0;
-      showMessage('', '');
-      loadCurrentWord();
-    }, 1000);
-
-  } else {
-    state.wrongAttempts++;
-    state.streak = 0;
-    updateScoreDisplay();
-    showMessage(`✗ Not quite — try again! (${5 - state.wrongAttempts} hints left)`, 'msg-error');
-
-    // Shake blanks
-    document.querySelectorAll('.word-blank').forEach(b => {
-      b.classList.add('wrong');
-      setTimeout(() => b.classList.remove('wrong'), 400);
-    });
-
-    if (state.wrongAttempts >= 5) {
-      showMessage(`The answer was: ${word}`, 'msg-info');
-      setTimeout(() => {
-        state.currentWordIndex++;
-        state.wrongAttempts = 0;
-        showMessage('', '');
-        loadCurrentWord();
-      }, 2000);
-    }
-
-    clearSelection();
-  }
+  if (G.sel.includes(idx)) return;
+  G.sel.push(idx);
+  refresh();
 }
 
-function clearSelection() {
-  state.selectedLetters = [];
-  state.selectedIndices.forEach(idx => {
-    const btn = document.getElementById(`lbtn-${idx}`);
-    if (btn) btn.classList.remove('selected');
+function refresh() {
+  // Highlight nodes
+  nodeEls.forEach((el, i) => {
+    el.classList.toggle('active', G.sel.includes(i));
   });
-  state.selectedIndices = [];
-  updateSelectedDisplay();
-  updateWordBlanks();
+  renderCurrentWord();
+  drawLines();
 }
 
-function skipPuzzle() {
-  state.puzzleIndex = (state.puzzleIndex + 1) % PUZZLES.length;
-  initPuzzle();
+function renderCurrentWord() {
+  const w = G.sel.map(i => G.puzzle.letters[i]).join('');
+  document.getElementById('current-word-display').textContent = w || '—';
 }
 
-function completePuzzle() {
-  const bonus = 50;
-  state.score += bonus;
-  updateScoreDisplay();
-  showMessage(`🎉 Puzzle Complete! +${bonus} bonus pts`, 'msg-success');
+// ==================== CANVAS LINES ====================
+function drawLines() {
+  const canvas = document.getElementById('wheel-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 280, 280);
+  if (G.sel.length < 1) return;
 
-  if (state.puzzleIndex >= PUZZLES.length - 1) {
-    // Game complete
-    setTimeout(showCelebration, 1200);
-  } else {
-    setTimeout(() => {
-      state.puzzleIndex++;
-      initPuzzle();
-    }, 2000);
+  const n = G.puzzle.letters.length;
+
+  // Draw the connecting line
+  if (G.sel.length >= 2) {
+    ctx.beginPath();
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(232,118,10,0.9)';
+    ctx.shadowColor = 'rgba(232,118,10,0.5)';
+    ctx.shadowBlur = 12;
+
+    G.sel.forEach((idx, i) => {
+      const p = nodePos(idx, n);
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+    ctx.shadowBlur = 0;
   }
+
+  // Dots at each selected node
+  G.sel.forEach((idx, i) => {
+    const p = nodePos(idx, n);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, i === 0 ? 10 : 7, 0, Math.PI * 2);
+    ctx.fillStyle = i === 0 ? 'rgba(240,192,64,0.9)' : 'rgba(232,118,10,0.7)';
+    ctx.fill();
+  });
+}
+
+// ==================== SUBMIT ====================
+function handleSubmit() {
+  G.dragging = false;
+  const word = G.sel.map(i => G.puzzle.letters[i]).join('');
+
+  if (word.length < 2) { clearSel(); return; }
+
+  if (G.foundAll.has(word)) {
+    setMsg('Already found!', 'msg-info');
+    clearSel(); return;
+  }
+
+  if (G.puzzle.words.includes(word)) {
+    G.foundAll.add(word);
+    G.foundThis.push(word);
+    const pts = word.length * 10;
+    G.score += pts;
+    document.getElementById('score-el').textContent = G.score;
+    document.getElementById('found-el').textContent = G.foundThis.length;
+    setMsg(`✓ ${word}! +${pts} pts`, 'msg-ok');
+    fillSlots(word);
+
+    // Check win
+    const targets = G.puzzle.words.slice(0, 6);
+    if (targets.every(w => G.foundAll.has(w))) {
+      G.score += 50;
+      document.getElementById('score-el').textContent = G.score;
+      setTimeout(() => {
+        setMsg('🎉 Puzzle Complete! +50 bonus', 'msg-ok');
+        if (G.pIdx >= PUZZLES.length - 1) {
+          setTimeout(showCelebration, 1200);
+        } else {
+          document.getElementById('next-btn').style.display = '';
+          document.getElementById('submit-btn').style.display = 'none';
+        }
+      }, 500);
+    }
+  } else {
+    setMsg(`"${word}" not found`, 'msg-err');
+  }
+
+  clearSel();
+}
+
+function fillSlots(word) {
+  word.split('').forEach((ch, i) => {
+    const s = document.getElementById(`sl-${word}-${i}`);
+    if (s) { s.textContent = ch; s.classList.add('solved'); }
+  });
+}
+
+function clearSel() {
+  G.sel = [];
+  G.dragging = false;
+  refresh();
+}
+
+// ==================== NAV ====================
+function nextPuzzle() {
+  if (G.pIdx < PUZZLES.length - 1) { G.pIdx++; initPuzzle(); }
 }
 
 function showCelebration() {
   document.getElementById('celeb-msg').textContent =
-    `You completed all ${PUZZLES.length} puzzles and honored the legacy of Black history's most powerful figures.`;
-  document.getElementById('final-score-display').textContent = `Final Score: ${state.score} pts`;
+    `You completed all ${PUZZLES.length} puzzles honoring the giants of Black history. Their legacy lives on.`;
+  document.getElementById('final-score-el').textContent = `Final Score: ${G.score} pts`;
   document.getElementById('celebration').classList.add('show');
 }
 
 function restartGame() {
-  state = { puzzleIndex: 0, score: 0, streak: 0, wordsFound: [], selectedLetters: [], selectedIndices: [], shuffledLetters: [], currentPuzzle: null, wrongAttempts: 0, currentWordIndex: 0, lives: 5 };
+  G = { pIdx:0, score:0, foundAll:new Set(), foundThis:[], sel:[], dragging:false, puzzle:null };
   document.getElementById('celebration').classList.remove('show');
   initPuzzle();
 }
 
-function showMessage(msg, cls) {
-  const el = document.getElementById('message-box');
-  el.textContent = msg;
-  el.className = cls;
+function setMsg(msg, cls) {
+  const el = document.getElementById('message');
+  el.textContent = msg; el.className = cls;
+  if (msg) setTimeout(() => { if(el.textContent===msg){el.textContent='';el.className='';} }, 2800);
 }
 
-function updateScoreDisplay() {
-  document.getElementById('score-display').textContent = state.score;
-  document.getElementById('puzzle-display').textContent = state.puzzleIndex + 1;
-  document.getElementById('streak-display').textContent = state.streak;
-}
-
-function renderFoundWords() {
-  const div = document.getElementById('words-found');
-  div.innerHTML = '';
-  const total = state.currentPuzzle.words.length;
-  state.currentPuzzle.words.forEach(w => {
-    const pill = document.createElement('div');
-    if (state.wordsFound.includes(w)) {
-      pill.className = 'found-word';
-      pill.textContent = w;
-    } else {
-      pill.className = 'found-word remaining-pill';
-      pill.textContent = '? '.repeat(w.length).trim();
-    }
-    div.appendChild(pill);
-  });
-}
-
-function updatePuzzleDots() {
-  const div = document.getElementById('puzzle-dots');
-  div.innerHTML = '';
-  PUZZLES.forEach((_, i) => {
-    const dot = document.createElement('div');
-    if (i < state.puzzleIndex) dot.className = 'puzzle-dot done';
-    else if (i === state.puzzleIndex) dot.className = 'puzzle-dot active';
-    else dot.className = 'puzzle-dot';
-    div.appendChild(dot);
-  });
-}
-
-// Keyboard support
+// Keyboard
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitWord();
-  if (e.key === 'Escape' || e.key === 'Backspace') clearSelection();
+  if (e.key === 'Escape') clearSel();
+  if (e.key === 'Enter') handleSubmit();
 });
 
-// Start!
 initPuzzle();
 </script>
 </body>
