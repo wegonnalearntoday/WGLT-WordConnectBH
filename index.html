@@ -270,13 +270,17 @@
 
   /* ── WHEEL ── */
   #wheel-wrap {
-    position:relative; width:300px; height:300px;
+    position:relative;
+    width: min(300px, 90vw);
+    height: min(300px, 90vw);
     margin:4px auto 8px; flex-shrink:0;
     touch-action:none;
   }
   /* Outer decorative ring */
   .wheel-ring {
-    position:absolute; top:5px; left:5px; width:290px; height:290px;
+    position:absolute; top:5px; left:5px;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px);
     border-radius:50%;
     background: radial-gradient(circle,
       rgba(29,107,107,0.12) 0%,
@@ -388,6 +392,17 @@
     font-family:'Cinzel',serif; font-size:1.2rem;
     color:var(--gold-bright); margin-bottom:22px;
   }
+  /* ── MOBILE ── */
+  @media (max-width: 420px) {
+    body { padding: 8px 6px 30px; }
+    h1 { font-size: clamp(1rem, 5vw, 1.4rem); letter-spacing: 1px; }
+    .stat { padding: 4px 8px; min-width: 56px; }
+    .stat-num { font-size: 1rem; }
+    .btn { padding: 8px 12px; font-size: 0.6rem; }
+    .letter-slot { width: 26px; height: 26px; font-size: 0.78rem; }
+    #current-word { font-size: 1.2rem; letter-spacing: 4px; }
+    .score-row { gap: 5px; }
+  }
 </style>
 </head>
 <body>
@@ -456,7 +471,7 @@ const PUZZLES = [
       HIRE:    "After freedom, people would ___ her as a spy and scout for the Union Army.",
       HEIR:    "She is considered the ___ to a long tradition of resistance against slavery.",
       TIER:    "She rose to the highest ___ of American heroism and courage.",
-      RATE:    "She moved at an incredible ____ rescuing people in the dead of night."
+      RATE:    "She moved at an incredible ___ — rescuing people in the dead of night."
     }
   },
   {
@@ -575,7 +590,20 @@ const PUZZLES = [
 // =====================================================
 // GAME STATE
 // =====================================================
-const CX = 150, CY = 150, RADIUS = 106;
+// Dynamic wheel dimensions - computed at runtime
+let CX = 150, CY = 150, RADIUS = 106;
+
+function updateWheelDims() {
+  const wrap = document.getElementById('wheel-wrap');
+  const size = wrap.offsetWidth;
+  CX = size / 2;
+  CY = size / 2;
+  RADIUS = size * 0.35;
+  // Also resize canvas
+  const canvas = document.getElementById('wheel-canvas');
+  canvas.width = size;
+  canvas.height = size;
+}
 
 let G = {
   pIdx:0, score:0,
@@ -600,6 +628,7 @@ function initPuzzle() {
   G.foundThis = [];
   G.sel = [];
   G.dragging = false;
+  updateWheelDims();
 
   document.getElementById('puzzle-el').textContent = `${G.pIdx+1}/8`;
   document.getElementById('found-el').textContent = 0;
@@ -680,56 +709,38 @@ function buildWheel() {
 
   drawLines();
 
-  // ---- Event Handling ----
-  // Use the wrap for all events
-  wrap.onmousedown = e => {
+  // ---- Pointer Events (works for mouse, touch, AND touchscreen monitors) ----
+  // Remove any old listeners
+  const newWrap = wrap.cloneNode(false);
+  while (wrap.firstChild) newWrap.appendChild(wrap.firstChild);
+  wrap.parentNode.replaceChild(newWrap, wrap);
+  const w = document.getElementById('wheel-wrap');
+
+  w.addEventListener('pointerdown', e => {
     const node = e.target.closest('.letter-node');
     if (!node) return;
     e.preventDefault();
+    w.setPointerCapture(e.pointerId);
     G.dragging = true;
     G.sel = [parseInt(node.dataset.idx)];
     refresh();
-  };
+  });
 
-  wrap.onmouseover = e => {
+  w.addEventListener('pointermove', e => {
     if (!G.dragging) return;
-    const node = e.target.closest('.letter-node');
-    if (!node) return;
-    tryAdd(parseInt(node.dataset.idx));
-  };
-
-  // Touch
-  wrap.ontouchstart = e => {
     e.preventDefault();
-    const t = e.touches[0];
-    const node = nodeAtPoint(t.clientX, t.clientY);
-    if (!node) return;
-    G.dragging = true;
-    G.sel = [parseInt(node.dataset.idx)];
-    refresh();
-  };
-
-  wrap.ontouchmove = e => {
-    e.preventDefault();
-    if (!G.dragging) return;
-    const t = e.touches[0];
-    const node = nodeAtPoint(t.clientX, t.clientY);
+    const node = nodeAtPoint(e.clientX, e.clientY);
     if (node) tryAdd(parseInt(node.dataset.idx));
-  };
+  });
 
-  wrap.ontouchend = e => {
+  w.addEventListener('pointerup', e => {
     e.preventDefault();
     if (G.dragging && G.sel.length >= 2) handleSubmit();
     else clearSel();
-  };
-}
+  });
 
-// Global mouseup
-document.addEventListener('mouseup', () => {
-  if (!G.dragging) return;
-  if (G.sel.length >= 2) handleSubmit();
-  else clearSel();
-});
+  w.addEventListener('pointercancel', () => clearSel());
+}
 
 function nodeAtPoint(cx, cy) {
   for (const el of G.nodeEls) {
@@ -766,7 +777,7 @@ function renderCurrentWord() {
 function drawLines() {
   const canvas = document.getElementById('wheel-canvas');
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,300,300);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (G.sel.length < 2) return;
 
   const n = G.puzzle.letters.length;
@@ -869,12 +880,12 @@ function fillSlots(word) {
   word.split('').forEach((ch, i) => {
     const s = document.getElementById(`sl-${word}-${i}`);
     if (s) {
+      // Remove all event listeners by setting them to null directly
+      s.onclick = null;
+      s.ontouchend = null;
       s.textContent = ch;
       s.classList.remove('hint-tap','peeked');
       s.classList.add('solved');
-      // Remove tap listener by replacing with clone
-      const clone = s.cloneNode(true);
-      s.parentNode.replaceChild(clone, s);
     }
   });
 }
@@ -913,6 +924,12 @@ function setMsg(msg, cls) {
 document.addEventListener('keydown', e => {
   if (e.key==='Escape') clearSel();
   if (e.key==='Enter') handleSubmit();
+});
+
+// Redraw on resize (e.g. phone rotation)
+window.addEventListener('resize', () => {
+  updateWheelDims();
+  buildWheel();
 });
 
 // =====================================================
