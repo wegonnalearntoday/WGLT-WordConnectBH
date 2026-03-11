@@ -186,7 +186,7 @@ const PUZZLES = [
     letters: ["R","O","S","A","P","K","C","I"],
     words: {
       ROSA:  "Her first name — on December 1st, 1955, she refused to give up her bus seat.",
-      PARK:  "Her last name — she sparked a movement by staying seated in the ___ of history.",
+      PARKS: "Her last name — she sparked a movement by staying seated in the ___ of history.",
       SOAR:  "Her courageous act caused the Civil Rights Movement to ___ to new heights.",
       ROCK:  "Her defiance was solid as a ___ — she would not be moved.",
       PAIR:  "She and Dr. King were a powerful ___ — both dedicated to equality.",
@@ -320,6 +320,7 @@ function nodePos(i, total) {
 // =====================================================
 let G = {
   pIdx: 0,
+  maxPIdx: 0,           // furthest puzzle ever reached
   score: 0,
   foundAll: new Set(),
   foundThis: [],
@@ -597,11 +598,12 @@ function handleSubmit() {
     fillSlots(word);
     showClue(word, false);
 
-    // Win: any 6 words found
+    // Win: all words found
     const numFound = wordList.filter(function(w) { return G.foundAll.has(w); }).length;
-    if (numFound >= 6) {
+    if (numFound >= wordList.length) {
       G.score += 50;
       G.completedPuzzles.add(G.pIdx);
+      if (G.pIdx >= G.maxPIdx) G.maxPIdx = G.pIdx + 1;  // advance frontier
       document.getElementById('score-el').textContent = G.score;
       setTimeout(function() {
         setMsg('🎉 Puzzle Complete! +50 bonus', 'msg-ok');
@@ -646,7 +648,9 @@ function clearSel() {
 // NAV
 // =====================================================
 function nextPuzzle() {
-  if (G.pIdx < PUZZLES.length - 1) { G.pIdx++; initPuzzle(); }
+  // After replaying an old puzzle, jump back to furthest reached; otherwise advance
+  const dest = G.pIdx < G.maxPIdx ? G.maxPIdx : G.pIdx + 1;
+  if (dest < PUZZLES.length) { G.pIdx = dest; initPuzzle(); }
 }
 
 function showCelebration() {
@@ -658,7 +662,7 @@ function showCelebration() {
 }
 
 function restartGame() {
-  G = { pIdx:0, score:0, foundAll:new Set(), foundThis:[], sel:[], dragging:false, puzzle:null, nodeEls:[], completedPuzzles:new Set() };
+  G = { pIdx:0, maxPIdx:0, score:0, foundAll:new Set(), foundThis:[], sel:[], dragging:false, puzzle:null, nodeEls:[], completedPuzzles:new Set() };
   document.getElementById('celebration').classList.remove('show');
   initPuzzle();
 }
