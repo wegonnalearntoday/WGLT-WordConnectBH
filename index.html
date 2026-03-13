@@ -379,8 +379,62 @@
     padding-top:4px;
   }
 
+  .btn-hint {
+    background: linear-gradient(135deg, rgba(120,60,180,0.5), rgba(60,20,100,0.7));
+    color: #d4b0ff;
+    border: 1px solid rgba(180,120,255,0.4);
+    box-shadow: 0 3px 12px rgba(120,60,180,0.3);
+  }
+  .btn-hint:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(120,60,180,0.5); }
+  .btn-hint:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  /* Special golden squares */
+  .letter-slot.special {
+    background: linear-gradient(135deg, rgba(180,60,220,0.35), rgba(100,20,160,0.5));
+    border-color: rgba(200,120,255,0.8);
+    box-shadow: 0 0 10px rgba(180,80,255,0.45), inset 0 0 6px rgba(200,120,255,0.15);
+    animation: special-pulse 2s ease-in-out infinite;
+  }
+  .letter-slot.special.solved {
+    background: linear-gradient(135deg, rgba(180,60,220,0.5), rgba(100,20,160,0.7));
+    border-color: rgba(200,120,255,0.9);
+    box-shadow: 0 0 14px rgba(180,80,255,0.6);
+    animation: none;
+  }
+  @keyframes special-pulse {
+    0%,100% { box-shadow: 0 0 8px rgba(180,80,255,0.4); }
+    50%      { box-shadow: 0 0 18px rgba(180,80,255,0.8); }
+  }
+
+  /* Shuffle button in center of wheel */
+  #shuffle-btn {
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    width:38px; height:38px; border-radius:50%;
+    background: linear-gradient(145deg, rgba(29,107,107,0.7), rgba(10,40,40,0.9));
+    border:1.5px solid rgba(201,146,26,0.45);
+    color:var(--gold); font-size:1rem;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:15;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(201,146,26,0.1);
+    transition:all 0.18s; user-select:none;
+  }
+  #shuffle-btn:hover {
+    background: linear-gradient(145deg, rgba(40,130,130,0.8), rgba(15,55,55,0.9));
+    border-color:var(--gold-bright);
+    box-shadow: 0 0 16px rgba(201,146,26,0.35);
+    transform:translate(-50%,-50%) rotate(30deg);
+  }
+  #shuffle-btn:active { transform:translate(-50%,-50%) rotate(180deg); }
+  .shuffle-spin { animation: spin-once 0.4s ease !important; }
+  @keyframes spin-once {
+    from { transform:translate(-50%,-50%) rotate(0deg); }
+    to   { transform:translate(-50%,-50%) rotate(360deg); }
+  }
+
   /* ── CONTROLS ── */
-  .controls { display:flex; gap:10px; justify-content:center; margin-top:6px; }
+  .controls { display:flex; gap:8px; justify-content:center; margin-top:6px; flex-wrap:wrap; }
   .btn {
     padding:9px 20px; border-radius:8px; border:none; cursor:pointer;
     font-family:'Cinzel',serif; font-weight:700; font-size:0.68rem;
@@ -721,6 +775,7 @@
   <div class="stat"><div class="stat-num" id="score-el">0</div><div class="stat-label">Score</div></div>
   <div class="stat"><div class="stat-num" id="puzzle-el">1/140</div><div class="stat-label">Puzzle</div></div>
   <div class="stat"><div class="stat-num" id="found-el">0</div><div class="stat-label">Found</div></div>
+  <div class="stat"><div class="stat-num" id="hints-el">💡 0</div><div class="stat-label">Hints</div></div>
 </div>
 
 <!-- HUB SCREEN -->
@@ -758,6 +813,7 @@
     <div class="controls">
       <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Submit</button>
       <button class="btn btn-clear" onclick="clearSel()">Clear</button>
+      <button class="btn btn-hint" id="hint-btn" onclick="useHintToken()">💡 Hint</button>
       <button class="btn btn-next" id="next-btn" style="display:none" onclick="nextPuzzle()">Next Puzzle →</button>
     </div>
   </div>
@@ -766,6 +822,7 @@
     <div id="wheel-wrap">
       <div class="wheel-ring"></div>
       <canvas id="wheel-canvas" width="220" height="220"></canvas>
+      <div id="shuffle-btn" title="Shuffle letters" onclick="shuffleWheel()">⇄</div>
     </div>
   </div>
 </div>
@@ -1145,6 +1202,7 @@ let G = {
   maxPIdx: 0,
   score: 0,
   bonusScore: 0,
+  hints: 0,
   completedPuzzles: new Set(),
   foundThis: [],
   foundBonus: [],
@@ -1152,7 +1210,10 @@ let G = {
   dragging: false,
   puzzle: null,
   nodeEls: [],
-  foundAll: new Set()
+  foundAll: new Set(),
+  specialSlots: [],      // [{word, letterIdx}] for this puzzle
+  hasSpecial: false,     // 25% chance flag
+  shuffleOrder: null,    // current display order of letters
 };
 
 function getInitials(theme) {
@@ -1172,6 +1233,11 @@ function initPuzzle() {
   G.sel = [];
   G.dragging = false;
 
+  // 25% chance of special squares this puzzle
+  G.hasSpecial = Math.random() < 0.25;
+  G.specialSlots = G.hasSpecial ? pickSpecialSlots() : [];
+  G.shuffleOrder = G.puzzle.letters.map((_, i) => i); // identity order initially
+
   const total = PUZZLES.length;
   if (currentSubjectLabel) {
     const pos = subjectPuzzleIndices.indexOf(G.pIdx);
@@ -1180,6 +1246,7 @@ function initPuzzle() {
     document.getElementById('puzzle-el').textContent = `${G.pIdx+1}/${total}`;
   }
   document.getElementById('found-el').textContent = 0;
+  updateHintsDisplay();
   document.getElementById('theme-label').textContent = G.puzzle.theme;
   document.getElementById('subject-label').textContent = G.puzzle.subject || '';
   document.getElementById('next-btn').style.display = 'none';
@@ -1239,12 +1306,14 @@ function buildSlots() {
     word.split('').forEach((_, i) => {
       const s = document.createElement('div');
       s.id = `sl-${word}-${i}`;
+      const isSpecial = G.specialSlots.some(sp => sp.word === word && sp.letterIdx === i);
       if (i === 0) {
-        s.className = 'letter-slot hint-tap';
-        s.title = 'Tap for a clue';
+        s.className = 'letter-slot hint-tap' + (isSpecial ? ' special' : '');
+        s.title = isSpecial ? '★ Special square! Find this word for a hint token' : 'Tap for a clue';
         s.addEventListener('click', () => tapHint(word, s));
       } else {
-        s.className = 'letter-slot';
+        s.className = 'letter-slot' + (isSpecial ? ' special' : '');
+        if (isSpecial) s.title = '★ Special square! Find this word for a hint token';
       }
       row.appendChild(s);
     });
@@ -1266,16 +1335,17 @@ function tapHint(word, slotEl) {
 // =====================================================
 function buildWheel() {
   const wrap = document.getElementById('wheel-wrap');
-  G.nodeEls.forEach(n => { if (n.parentNode) n.parentNode.removeChild(n); });
+  G.nodeEls.forEach(n => { if (n.parentNode === wrap) wrap.removeChild(n); });
   G.nodeEls = [];
 
   const letters = G.puzzle.letters;
-  letters.forEach((ch, i) => {
-    const pos = nodePos(i, letters.length);
+  // Build nodes in shuffleOrder (maps display position → letter index)
+  G.shuffleOrder.forEach((letterIdx, displayPos) => {
+    const pos = nodePos(displayPos, letters.length);
     const el = document.createElement('div');
     el.className = 'letter-node';
-    el.textContent = ch;
-    el.dataset.idx = i;
+    el.textContent = letters[letterIdx];
+    el.dataset.idx = letterIdx; // always the real letter index
     el.style.cssText = `left:${pos.x}px;top:${pos.y}px;transform:translate(-50%,-50%)`;
     wrap.appendChild(el);
     G.nodeEls.push(el);
@@ -1326,7 +1396,7 @@ function tryAdd(idx) {
 }
 
 function refresh() {
-  G.nodeEls.forEach((el, i) => el.classList.toggle('active', G.sel.includes(i)));
+  G.nodeEls.forEach(el => el.classList.toggle('active', G.sel.includes(parseInt(el.dataset.idx))));
   renderCurrentWord();
   drawLines();
 }
@@ -1339,6 +1409,11 @@ function renderCurrentWord() {
 // =====================================================
 // CANVAS LINES
 // =====================================================
+// Convert a real letter index to its current display position (after shuffle)
+function displayPosOf(letterIdx) {
+  return G.shuffleOrder ? G.shuffleOrder.indexOf(letterIdx) : letterIdx;
+}
+
 function drawLines() {
   const canvas = document.getElementById('wheel-canvas');
   const ctx = canvas.getContext('2d');
@@ -1353,13 +1428,13 @@ function drawLines() {
   ctx.shadowBlur = 16;
   ctx.beginPath();
   G.sel.forEach((idx, i) => {
-    const p = nodePos(idx, n);
+    const p = nodePos(displayPosOf(idx), n);
     i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
   });
   ctx.stroke();
   ctx.shadowBlur = 0;
   G.sel.forEach((idx, i) => {
-    const p = nodePos(idx, n);
+    const p = nodePos(displayPosOf(idx), n);
     ctx.beginPath();
     ctx.arc(p.x, p.y, i === 0 ? 10 : 7, 0, Math.PI * 2);
     ctx.fillStyle = i === 0 ? 'rgba(232,184,50,0.95)' : 'rgba(192,112,32,0.8)';
@@ -1413,6 +1488,7 @@ function handleSubmit() {
     setMsg(`✓ ${word}! +${pts} pts`, 'msg-ok');
     fillSlots(word);
     showClue(word, false);
+    checkSpecialWord(word);
     if (G.foundThis.length >= wordList.length) {
       G.completedPuzzles.add(G.pIdx);
       if (G.pIdx >= G.maxPIdx) G.maxPIdx = G.pIdx + 1;
@@ -1454,11 +1530,117 @@ function handleSubmit() {
       document.getElementById('score-el').textContent = G.score;
       addBonusChip(wordLower, pts);
       showBonusFlash(word, pts);
+      checkBonusCompletion();
     } else {
       setMsg(`"${word}" — keep trying!`, 'msg-err');
     }
   }
   clearSel();
+}
+
+// =====================================================
+// SHUFFLE
+// =====================================================
+function shuffleWheel() {
+  if (G.sel.length > 0) return; // don't shuffle mid-swipe
+  // Fisher-Yates shuffle of the display order
+  const arr = [...G.shuffleOrder];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  G.shuffleOrder = arr;
+  // Animate the button
+  const btn = document.getElementById('shuffle-btn');
+  btn.classList.remove('shuffle-spin');
+  void btn.offsetWidth;
+  btn.classList.add('shuffle-spin');
+  setTimeout(() => btn.classList.remove('shuffle-spin'), 420);
+  // Rebuild wheel with new order
+  buildWheel();
+}
+
+// =====================================================
+// SPECIAL SQUARES
+// =====================================================
+function pickSpecialSlots() {
+  const words = Object.keys(G.puzzle.words);
+  if (words.length === 0) return [];
+  // Pick 1-2 random words, then a random letter slot in each
+  const count = Math.random() < 0.4 ? 2 : 1;
+  const picked = [];
+  const shuffled = [...words].sort(() => Math.random() - 0.5);
+  for (let i = 0; i < Math.min(count, shuffled.length); i++) {
+    const word = shuffled[i];
+    const letterIdx = Math.floor(Math.random() * word.length);
+    picked.push({ word, letterIdx });
+  }
+  return picked;
+}
+
+function checkSpecialWord(word) {
+  if (!G.hasSpecial) return;
+  const match = G.specialSlots.find(sp => sp.word === word);
+  if (!match) return;
+  G.hints++;
+  updateHintsDisplay();
+  G.specialSlots = G.specialSlots.filter(sp => sp.word !== word);
+  setTimeout(() => setMsg('★ Special square! +1 Hint token earned!', 'msg-ok'), 900);
+}
+
+// =====================================================
+// HINT TOKEN
+// =====================================================
+function updateHintsDisplay() {
+  document.getElementById('hints-el').textContent = `💡 ${G.hints}`;
+  document.getElementById('hint-btn').disabled = G.hints === 0;
+}
+
+function useHintToken() {
+  if (G.hints <= 0) { setMsg('No hint tokens! Find special squares ★', 'msg-info'); return; }
+  // Find a random unsolved letter across all incomplete words
+  const unsolved = [];
+  Object.keys(G.puzzle.words).forEach(word => {
+    if (G.foundThis.includes(word)) return;
+    word.split('').forEach((ch, i) => {
+      const slot = document.getElementById(`sl-${word}-${i}`);
+      if (slot && !slot.classList.contains('solved') && !slot.classList.contains('peeked')) {
+        // skip the first slot (it's the ? hint slot) — only reveal letter slots
+        if (i > 0) unsolved.push({ word, i, ch, slot });
+      }
+    });
+  });
+  if (unsolved.length === 0) { setMsg('All letters already revealed!', 'msg-info'); return; }
+  // Pick random unsolved letter
+  const pick = unsolved[Math.floor(Math.random() * unsolved.length)];
+  pick.slot.textContent = pick.ch;
+  pick.slot.classList.add('peeked');
+  pick.slot.style.borderColor = 'rgba(180,120,255,0.8)';
+  pick.slot.style.color = '#d4b0ff';
+  G.hints--;
+  updateHintsDisplay();
+  setMsg(`💡 Revealed: ${pick.ch} in "${pick.word}"`, 'msg-info');
+}
+
+// =====================================================
+// BONUS COMPLETION CHECK
+// =====================================================
+function checkBonusCompletion() {
+  const total = (G.puzzle.bonus || []).length;
+  if (total === 0) return;
+  if (G.foundBonus.length >= total) {
+    const bonusPts = 100;
+    G.score += bonusPts;
+    G.hints += 2;
+    document.getElementById('score-el').textContent = G.score;
+    updateHintsDisplay();
+    // Big flash
+    const el = document.createElement('div');
+    el.className = 'bonus-flash';
+    el.innerHTML = `🎉 All Bonus Words! +${bonusPts} pts &amp; +2 Hints!`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
 }
 
 function resetBonusTray() {
@@ -1567,7 +1749,8 @@ function showCelebration() {
 }
 
 function restartGame() {
-  G = { pIdx:0, maxPIdx:0, score:0, bonusScore:0, completedPuzzles:new Set(), foundThis:[], foundBonus:[], sel:[], dragging:false, puzzle:null, nodeEls:[], foundAll:new Set() };
+  G = { pIdx:0, maxPIdx:0, score:0, bonusScore:0, hints:0, completedPuzzles:new Set(), foundThis:[], foundBonus:[], sel:[], dragging:false, puzzle:null, nodeEls:[], foundAll:new Set(), specialSlots:[], hasSpecial:false, shuffleOrder:null };
+  updateHintsDisplay();
   currentSubjectLabel = null;
   subjectPuzzleIndices = [];
   subjectPuzzlePos = 0;
