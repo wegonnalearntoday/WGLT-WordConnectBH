@@ -270,13 +270,13 @@
 
   /* ── WHEEL ── */
   #wheel-wrap {
-    position:relative; width:300px; height:300px;
-    margin:4px auto 8px; flex-shrink:0;
+    position:relative; width:220px; height:220px;
+    margin:0; flex-shrink:0;
     touch-action:none;
   }
   /* Outer decorative ring */
   .wheel-ring {
-    position:absolute; top:5px; left:5px; width:290px; height:290px;
+    position:absolute; top:5px; left:5px; width:210px; height:210px;
     border-radius:50%;
     background: radial-gradient(circle,
       rgba(29,107,107,0.12) 0%,
@@ -329,6 +329,45 @@
       0 4px 12px rgba(0,0,0,0.5);
   }
 
+  /* ── RESPONSIVE: stack vertically on small screens ── */
+  @media (max-width: 480px) {
+    #play-row {
+      flex-direction:column;
+      align-items:center;
+    }
+    #wheel-col { padding-top:0; }
+    #wheel-wrap { width:280px; height:280px; margin:4px auto 8px; }
+    .wheel-ring { width:270px; height:270px; }
+  }
+
+  /* ── PLAY ROW: words left, wheel right ── */
+  #play-row {
+    display:flex;
+    flex-direction:row;
+    align-items:flex-start;
+    justify-content:center;
+    gap:12px;
+    width:100%;
+    max-width:540px;
+    margin:4px 0 0;
+  }
+  #words-col {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    flex:1;
+    min-width:0;
+  }
+  #words-col #current-word { align-self:center; }
+  #words-col #message      { align-self:center; }
+  #words-col .controls     { align-self:center; margin-top:8px; }
+  #wheel-col {
+    flex-shrink:0;
+    display:flex;
+    align-items:flex-start;
+    padding-top:4px;
+  }
+
   /* ── CONTROLS ── */
   .controls { display:flex; gap:10px; justify-content:center; margin-top:6px; }
   .btn {
@@ -361,7 +400,7 @@
   /* ── BONUS TRAY ── */
   #bonus-tray {
     width:100%; max-width:540px;
-    margin:10px 0 4px;
+    margin:6px auto 4px;
     border:1px solid rgba(201,146,26,0.25);
     border-radius:10px;
     background:rgba(13,42,42,0.55);
@@ -455,24 +494,25 @@
 /* ── SUBJECT GROUP DOTS ── */
 .puzzle-dots { 
   display:flex; flex-direction:column; gap:6px; 
-  align-items:flex-start; width:100%; max-width:540px;
-  margin:4px 0 6px; max-height:160px; overflow-y:auto;
-  padding:4px 0;
+  align-items:center; width:100%; max-width:540px;
+  margin:4px 0 6px; max-height:180px; overflow-y:auto;
+  padding:6px 6px 4px;
 }
 .dot-group { width:100%; }
 .dot-group-label {
   font-family:'Lato',sans-serif; font-size:0.44rem;
   letter-spacing:2px; text-transform:uppercase;
-  color:rgba(201,146,26,0.45); margin-bottom:3px;
-  padding-left:2px;
+  color:rgba(201,146,26,0.45); margin-bottom:4px;
+  padding-left:2px; text-align:center;
 }
-.dot-row { display:flex; flex-wrap:wrap; gap:4px; }
+.dot-row { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
 .pdot {
-  width:26px; height:26px; border-radius:50%;
+  width:34px; height:34px; border-radius:50%;
   background:rgba(29,107,107,0.3); border:1px solid rgba(201,146,26,0.3);
   transition:all 0.3s; display:flex; align-items:center; justify-content:center;
-  font-family:'Cinzel',serif; font-size:0.44rem; font-weight:700;
+  font-family:'Cinzel',serif; font-size:0.48rem; font-weight:700;
   color:rgba(201,146,26,0.4); cursor:default;
+  flex-shrink:0;
 }
 .pdot.done { 
   background:var(--teal-mid); border-color:var(--teal-mid); 
@@ -697,22 +737,29 @@
 </div>
 
 <div class="hint-label">tap <span style="color:var(--gold)">?</span> on first square for a clue</div>
-<div id="words-grid"></div>
-<div id="current-word">—</div>
-<div id="message"></div>
 
-<div id="wheel-wrap">
-  <div class="wheel-ring"></div>
-  <canvas id="wheel-canvas" width="300" height="300"></canvas>
+<!-- SIDE-BY-SIDE: words left, wheel right -->
+<div id="play-row">
+  <div id="words-col">
+    <div id="words-grid"></div>
+    <div id="current-word">—</div>
+    <div id="message"></div>
+    <div class="controls">
+      <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Submit</button>
+      <button class="btn btn-clear" onclick="clearSel()">Clear</button>
+      <button class="btn btn-next" id="next-btn" style="display:none" onclick="nextPuzzle()">Next Puzzle →</button>
+    </div>
+  </div>
+
+  <div id="wheel-col">
+    <div id="wheel-wrap">
+      <div class="wheel-ring"></div>
+      <canvas id="wheel-canvas" width="220" height="220"></canvas>
+    </div>
+  </div>
 </div>
 
-<div class="controls">
-  <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Submit</button>
-  <button class="btn btn-clear" onclick="clearSel()">Clear</button>
-  <button class="btn btn-next" id="next-btn" style="display:none" onclick="nextPuzzle()">Next Puzzle →</button>
-</div>
-
-<!-- BONUS WORD TRAY -->
+<!-- BONUS WORD TRAY — centered below play row -->
 <div id="bonus-tray">
   <div id="bonus-tray-header" onclick="toggleBonusTray()">
     <span>🔍 Bonus Words</span>
