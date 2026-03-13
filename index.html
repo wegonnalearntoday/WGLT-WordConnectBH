@@ -514,12 +514,13 @@
     font-family:'Cinzel',serif; font-size:1.1rem; letter-spacing:1px;
     padding:10px 24px; border-radius:30px;
     pointer-events:none; z-index:300;
-    animation: bonusFlash 1.2s ease forwards;
+    animation: bonusFlash 3.5s ease forwards;
   }
   @keyframes bonusFlash {
     0%   { opacity:0; transform:translate(-50%,-60%) scale(0.8); }
-    20%  { opacity:1; transform:translate(-50%,-50%) scale(1.05); }
-    70%  { opacity:1; transform:translate(-50%,-50%) scale(1); }
+    12%  { opacity:1; transform:translate(-50%,-50%) scale(1.08); }
+    20%  { opacity:1; transform:translate(-50%,-50%) scale(1); }
+    75%  { opacity:1; transform:translate(-50%,-50%) scale(1); }
     100% { opacity:0; transform:translate(-50%,-40%) scale(0.95); }
   }
 
@@ -637,23 +638,24 @@
 }
 .hub-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
   width: 100%;
 }
 .hub-card {
   background: linear-gradient(145deg, rgba(20,50,50,0.85), rgba(10,25,25,0.95));
   border: 1.5px solid rgba(201,146,26,0.25);
-  border-radius: 12px;
-  padding: 14px 12px 12px;
+  border-radius: 10px;
+  padding: 10px 6px 8px;
   cursor: pointer;
   transition: all 0.22s ease;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
 }
 .hub-card::before {
   content: '';
@@ -684,21 +686,21 @@
   font-weight: 700;
 }
 .hub-emoji {
-  font-size: 1.6rem;
+  font-size: 1.2rem;
   line-height: 1;
 }
 .hub-label {
   font-family: 'Cinzel', serif;
-  font-size: 0.58rem;
-  letter-spacing: 1.5px;
+  font-size: 0.42rem;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--gold-bright);
   line-height: 1.3;
 }
 .hub-meta {
   font-family: 'Lato', sans-serif;
-  font-size: 0.5rem;
-  letter-spacing: 1px;
+  font-size: 0.4rem;
+  letter-spacing: 0.5px;
   color: rgba(201,146,26,0.45);
   text-transform: uppercase;
   margin-top: 2px;
@@ -773,7 +775,7 @@
 
 <div class="score-row">
   <div class="stat"><div class="stat-num" id="score-el">0</div><div class="stat-label">Score</div></div>
-  <div class="stat"><div class="stat-num" id="puzzle-el">1/140</div><div class="stat-label">Puzzle</div></div>
+  <div class="stat"><div class="stat-num" id="puzzle-el">1/150</div><div class="stat-label">Puzzle</div></div>
   <div class="stat"><div class="stat-num" id="found-el">0</div><div class="stat-label">Found</div></div>
   <div class="stat"><div class="stat-num" id="hints-el">💡 0</div><div class="stat-label">Hints</div></div>
 </div>
@@ -813,7 +815,7 @@
     <div class="controls">
       <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Submit</button>
       <button class="btn btn-clear" onclick="clearSel()">Clear</button>
-      <button class="btn btn-hint" id="hint-btn" onclick="useHintToken()">💡 Hint</button>
+      <button class="btn btn-hint" id="hint-btn" onclick="useHintToken()">💡 Hint <span id="hint-count">(0)</span></button>
       <button class="btn btn-next" id="next-btn" style="display:none" onclick="nextPuzzle()">Next Puzzle →</button>
     </div>
   </div>
@@ -854,7 +856,7 @@
 
 <script>
 // =====================================================
-// PUZZLE DATA — 140 puzzles across 14 subjects
+// PUZZLE DATA — 150 puzzles across 15 subjects
 // Every word verified to be formable from the 8 letters
 // =====================================================
 
@@ -876,7 +878,8 @@ const SUBJECT_EMOJIS = {
   "DIMINISHED HISTORY": "📜",
   "WORLD FIGURES":      "🌍",
   "SUPERHEROES":        "⚡",
-  "DIVINE NINE":        "🔱"
+  "DIVINE NINE":        "🔱",
+  "BLACK HISTORY MIX":  "🌟"
 };
 
 // Track which subjects player has chosen, and completion per subject
@@ -1162,6 +1165,21 @@ const SUBJECTS = [
       { theme:"Zeta Phi Beta", letters:["Z","E","T","A","P","H"], words:{ ZETA:"Their name — ___ Phi Beta, founded at Howard in 1920 as Phi Beta Sigma's sister sorority.", HEAP:"They built a ___ of firsts — first sorority with an African chapter and a national headquarters.", PATH:"They cleared a ___ for all who followed — five Howard women founded Zeta Phi Beta in 1920.", HATE:"They turned ___ into fuel — Zeta women rise above every obstacle with Finer Womanhood.", HEAT:"They bring ___ to every room — Zeta women are known for energy, excellence, and service.", TAPE:"Their founding story ___ s together sisterhood, scholarship, service, and sisterly love.", PHAT:"Their legacy is ___ — full, rich, and overflowing with achievement and community service.", HAZE:"They cut through the ___ of inequality — five Howard women shining bright since 1920." }, bonus:["eat","pea","tap","tea","hat","pet","zap","ape","hap","eta"]},
       { theme:"Sigma Gamma Rho", letters:["S","I","G","M","A","R"], words:{ SIGMA:"___ Gamma Rho — the only Divine Nine sorority founded at a predominantly white institution.", GRAMS:"Every ___ of their effort counts — Sigma Gamma Rho transforms communities across the globe.", MARS:"They ___ the record books — the only Divine Nine sorority founded at a PWI, Butler University.", AIRS:"They put on no ___ — Sigma Gamma Rho women serve with genuine, grounded dedication always.", RIMS:"They ___ their legacy with gold — founded by seven teachers at Butler University in 1922.", ARMS:"They open their ___ to communities worldwide — Greater Service, Greater Progress is their drive.", AIMS:"Their ___ are clear — education, health, and community empowerment across the globe.", GRIM:"The ___ barriers of racism could not stop seven teachers from founding Sigma Gamma Rho in 1922." }, bonus:["gram","aim","gas","mar","ram","sag","sir"]},
       { theme:"Iota Phi Theta", letters:["I","O","T","A","P","H"], words:{ IOTA:"Their name — ___ Phi Theta, the youngest Divine Nine org, founded at Morgan State in 1963.", PATH:"They forged a ___ during the Civil Rights era — twelve Morgan State men founded Iota in 1963.", OATH:"Their founding ___ still holds — Scholarship, Leadership, Citizenship, Fidelity, Brotherhood.", ATOP:"They climbed ___ every barrier — the youngest Divine Nine org is growing powerfully today.", PHAT:"Their legacy is ___ — bold and full, the youngest Divine Nine fraternity still rising strong.", TOPI:"Like the ___ hat, they flipped expectations upside down — youngest and still rising in the Divine Nine.", OPAH:"Like the ___ fish that generates its own warmth, Iota men are self-motivated and luminous.", PHOT:"Every ___ of light they shine brightens their community — Iota men lead with purpose and pride." }, bonus:["opt","pit","tap","tip","top","hat","hip","hot","atop"]}
+    ]
+  },
+  {
+    label: "BLACK HISTORY MIX",
+    puzzles: [
+      { theme:"We Shall Overcome", letters:["T","A","L","E"], words:{ TALE:"Every generation added a chapter to the ___ — from slavery to civil rights to today.", TEAL:"Freedom quilts in shades of ___ carried hidden messages on the Underground Railroad.", LATE:"Change came ___ for many — but the movement never stopped pushing until it arrived.", ALE:"In Harlem's jazz clubs, a cold ___ flowed as musicians played the soundtrack of resistance.", TEA:"Civil rights organizers gathered over ___ to plan marches that would change the nation.", EAT:"To ___ at a lunch counter was an act of protest — sit-ins forced integration across the South." }, bonus:["lea","let"]},
+      { theme:"Black Wall Street — Tulsa 1921", letters:["S","T","A","R"], words:{ STAR:"The Greenwood District was a ___ of Black economic power — a thriving community burned in 1921.", ARTS:"Black Wall Street was known for its ___ — theaters, music halls, and culture flourished there.", TSAR:"Black entrepreneurs ruled Greenwood like a ___ — building an empire from the ground up.", ART:"The Greenwood community expressed its pride through ___ long before the 1921 destruction.", RAT:"Racist mobs tried to ___ out the wealth of a thriving people — but the memory survived.", TAR:"They tried to ___ the story of Black Wall Street — but survivors rebuilt and the truth endured.", SAT:"America ___ in silence for decades before finally acknowledging what happened in Tulsa." }, bonus:[]},
+      { theme:"Say It Loud — James Brown", letters:["B","E","A","T"], words:{ BEAT:"James Brown's ___ was unstoppable — the hardest-working man in show business never missed.", BATE:"Nothing could ___ his energy on stage — James Brown performed like his life depended on it.", BAT:"He swung for the fences like a ___ — 'Say It Loud' hit harder than anything on the charts.", EAT:"James Brown didn't just perform — he let the music ___ him alive every single night.", TAB:"He ran up a long ___ with American music — and pop, funk, and hip-hop still owe him a debt.", TEA:"Before shows he drank ___ with honey — one of many rituals of the consummate professional." }, bonus:[]},
+      { theme:"The Color Purple", letters:["P","A","L","E"], words:{ PALE:"Nothing about Celie's story was ___ — it burned with color, pain, and hard-won joy.", PLEA:"Her letters to God were a ___ — a cry for dignity from a woman the world tried to silence.", PEAL:"The ___ of church bells rang through the film's most powerful moments of grace and survival.", LEAP:"Shug Avery helped Celie ___ from silence into her own voice — a transformation for the ages.", ALE:"Mister drowned his cruelty in drink — while Celie endured and outlasted every ___ of his rage.", LAP:"Nettie sat in her sister's ___ as a child — their forced separation became the wound of the story.", PEA:"The garden Celie tended — growing ___ vines and greens — was her quiet act of reclaiming life." }, bonus:["lea"]},
+      { theme:"The Harlem Renaissance", letters:["H","A","R","L","E"], words:{ HARE:"Ideas spread like a ___ through Harlem — writers and artists racing to define Black culture.", EARL:"Duke Ellington was the ___ of jazz — reigning over Harlem's music scene for decades.", HALE:"Langston Hughes remained ___ and prolific to the end — Harlem made him the poet he became.", HEAR:"For the first time America had to ___ Black voices — the Renaissance demanded that attention.", REAL:"The Harlem Renaissance made Black joy and pain ___ to audiences who had tried to ignore both.", ALE:"In Harlem's speakeasies, ___ and jazz mixed as artists argued art, race, and revolution.", EAR:"The world finally lent an ___ to Black artists — and what they heard changed American culture." }, bonus:["era","lea"]},
+      { theme:"Motown: The Sound of Young America", letters:["G","R","A","C","E"], words:{ GRACE:"Diana Ross moved with ___ — Motown trained its artists in poise, diction, and dignity.", RACE:"Motown crossed every ___ barrier — the first Black label to dominate mainstream pop radio.", CAGE:"Berry Gordy broke artists free from the ___ of segregated R&B — and took them to the world.", ACRE:"From a single ___ of Detroit, Berry Gordy built a music empire that changed American culture.", CARE:"Motown took ___ with everything — the choreography, the clothes, the harmonies, the message.", RAGE:"Beneath the pop shine was quiet ___ — Marvin Gaye's 'What's Going On' spoke truth to power.", ACE:"Every Motown act was trained to be an ___ — total entertainers, not just singers.", ARC:"The creative ___ of Motown spans from joyful pop to protest — the full range of Black life." }, bonus:["age","ear","era"]},
+      { theme:"I Have a Dream — Dr. Martin Luther King Jr.", letters:["P","R","I","D","E"], words:{ PRIDE:"Dr. King's speech filled every Black American with ___ — their dignity declared before the world.", RIDE:"The Freedom Riders risked their lives to ___ interstate buses into the segregated South.", DIRE:"The conditions in Birmingham jails were ___ — yet marchers kept coming, unbroken.", RIPE:"By 1963 the nation was ___ for change — four hundred years of injustice could not be ignored.", PIER:"King stood at the ___ of history on August 28, 1963 — and launched a dream into the future.", DRIP:"Change didn't flood in — it had to ___ through years of sacrifice before the dam finally broke.", PIE:"King didn't just dream of ___ in the sky — he organized, marched, and bled for justice now.", DIP:"His voice would ___ low then rise — building the crowd at the Mall to an unforgettable crescendo." }, bonus:[]},
+      { theme:"Strange Fruit — Billie Holiday", letters:["F","L","A","M","E"], words:{ FLAME:"Billie Holiday's voice carried the ___ of protest — 'Strange Fruit' burned through every room.", FAME:"Her ___ came at a cost — the FBI targeted her, clubs avoided her, but the song lived forever.", LAME:"No excuse was ___ enough for the silence — Holiday forced America to see its own brutality.", MALE:"The white ___ power structure tried to silence her — but 'Strange Fruit' could not be unsung.", LEAF:"Each ___ of the tree in the song became a symbol — nature itself bearing witness to violence.", MEAL:"Holiday sometimes performed on an empty stomach — too poor between sets for a proper ___.", ALE:"In smoky clubs over a glass of ___, her voice silenced every room when Strange Fruit began.", ELM:"The imagery of the poplar and the ___ tree made 'Strange Fruit' haunt listeners for life." }, bonus:["lea"]},
+      { theme:"Black Panther — Wakanda Forever", letters:["B","L","A","C","K"], words:{ BLACK:"___ Panther was the first superhero blockbuster with a nearly all-Black cast and director.", BACK:"The film brought Black pride ___ to the screen in a way Hollywood had never dared to show.", LACK:"Hollywood claimed to ___ the audience for Black-led films — Black Panther proved that a lie.", BALK:"Studios used to ___ at Black superhero stories — one billion dollars changed their minds.", CAB:"Like a ___ navigating a city, Wakanda had to decide which values — and people — to carry forward.", LAB:"Shuri's ___ was the heart of Wakandan innovation — science and tradition fused perfectly." }, bonus:[]},
+      { theme:"Lift Every Voice and Sing", letters:["S","P","E","A","K"], words:{ SPEAK:"The Black National Anthem dares to ___ joy and pain — written by James Weldon Johnson in 1900.", PEAK:"At its ___, 'Lift Every Voice' moves audiences to tears — a hymn of survival and enduring hope.", ASK:"The anthem doesn't just celebrate — it ___ hard questions about justice, faith, and the future.", PEA:"Humble as a ___ plant yet towering in meaning — the song grew from a school recital to an anthem.", SAP:"No hardship could ___ the spirit in the song — written to endure every season of struggle.", SPA:"The song is a ___ for the soul — a balm after centuries of being told Black lives did not matter." }, bonus:["sake"]}
     ]
   }
 ];
@@ -1593,7 +1611,10 @@ function checkSpecialWord(word) {
 // =====================================================
 function updateHintsDisplay() {
   document.getElementById('hints-el').textContent = `💡 ${G.hints}`;
-  document.getElementById('hint-btn').disabled = G.hints === 0;
+  const hintBtn = document.getElementById('hint-btn');
+  hintBtn.disabled = G.hints === 0;
+  const countEl = document.getElementById('hint-count');
+  if (countEl) countEl.textContent = `(${G.hints})`;
 }
 
 function useHintToken() {
@@ -1639,7 +1660,7 @@ function checkBonusCompletion() {
     el.className = 'bonus-flash';
     el.innerHTML = `🎉 All Bonus Words! +${bonusPts} pts &amp; +2 Hints!`;
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2000);
+    setTimeout(() => el.remove(), 3500);
   }
 }
 
